@@ -24,7 +24,7 @@ public class Notice {
     @Column(name = "id")
     private Long noticeId;
 
-    // DDL의 author_id NOT NULL 컬럼 - 현재 엔티티에 없어서 insert 시 제약 위반(ORA-01400) 날 수 있음
+    // DDL의 author_id NOT NULL 컬럼 - 공지 작성 시 반드시 작성자(관리자 회원 ID)를 넣어야 함
     @Column(name = "author_id", nullable = false)
     private Long authorId;
 
@@ -44,6 +44,7 @@ public class Notice {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now(); // updated_at 도 NOT NULL
     }
 
     @PreUpdate

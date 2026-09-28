@@ -8,6 +8,7 @@ import com.bingomap.bingo_map.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -50,7 +51,13 @@ public class AdminController {
             return null;
         }
         long memberCount = userRepository.count();
-        long pendingReportCount = binReportRepository.countByStatus(BinReport.STATUS_PENDING);
+        long pendingReportCount;
+        try {
+            pendingReportCount = binReportRepository.countByStatus(BinReport.STATUS_PENDING);
+        } catch (DataAccessException e) {
+            // bin_reports 테이블을 아직 안 만들었거나 DB 오류여도 관리자 화면은 열리게 0으로 처리
+            pendingReportCount = 0;
+        }
         return new AdminDashboardResponseDto(memberCount, 0, 0, pendingReportCount);
     }
 

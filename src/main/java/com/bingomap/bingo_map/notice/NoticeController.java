@@ -62,6 +62,8 @@ public class NoticeController
         }
 
         Notice notice = new Notice(dto.getTitle(), dto.getContent());
+        // notices.author_id 는 NOT NULL → 로그인한 관리자의 회원 ID를 작성자로 저장
+        notice.setAuthorId((Long) request.getSession(false).getAttribute(LoginController.SESSION_USER_ID));
         noticeRepository.save(notice);
         return ResponseEntity.ok(toDto(notice));
     }

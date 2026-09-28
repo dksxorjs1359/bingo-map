@@ -5,6 +5,10 @@ document.addEventListener("DOMContentLoaded", function () {
     // 1) 대시보드 통계 로드 (회원 수는 실제 값, 나머지는 기능 연동 전이라 0)
     fetch("/api/admin/dashboard")
         .then((res) => {
+            if (res.status === 401 || res.status === 403) {
+                window.location.href = "/login";
+                return "";
+            }
             if (!res.ok) throw new Error("failed");
             return res.text();
         })
@@ -20,7 +24,9 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("admin-pending-count").textContent = data.pendingReportCount.toLocaleString();
         })
         .catch(() => {
-            window.location.href = "/login";
+            // 통계 조회만 실패한 경우엔 관리자 화면을 그대로 열어 둔다 (예전엔 여기서 /login 으로 튕겼음)
+            ["admin-member-count", "admin-bin-count", "admin-restaurant-count", "admin-pending-count"]
+                .forEach((id) => { const el = document.getElementById(id); if (el) el.textContent = "-"; });
         });
 
     // 1-1) 대시보드 '제보 검수 대기 목록' 미리보기 (보류 중인 것 상위 5개)
