@@ -31,10 +31,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // 1-1) 대시보드 '제보 검수 대기 목록' 미리보기 (보류 중인 것 상위 5개)
     function loadDashboardPendingReports() {
-        fetch("/api/admin/reports")
-            .then((res) => (res.ok ? res.json() : []))
-            .then((list) => {
-                const pending = list.filter((r) => r.status === "PENDING").slice(0, 5);
+        fetch("/api/admin/reports?status=PENDING&page=0&size=5")
+            .then((res) => (res.ok ? res.json() : { items: [] }))
+            .then((data) => {
+                const pending = data.items || [];
                 const el = document.getElementById("dashboard-pending-reports");
                 if (!pending.length) {
                     el.innerHTML = '<p class="admin-empty">보류 중인 제보가 없습니다.</p>';
@@ -211,12 +211,52 @@ document.addEventListener("DOMContentLoaded", function () {
         reportMessageEl.className = "admin-message " + (isError ? "error" : "success");
     }
 
+    // 페이지 나눔 상태 (page는 0부터). 승인/반려/삭제 후 loadReports()를 다시 불러도 현재 페이지·필터가 유지된다.
+    let reportPage = 0;
+    let reportSize = 10;
+    let reportStatus = "ALL";
+    const reportPagerEl = document.getElementById("report-pagination");
+
     function loadReports() {
-        fetch("/api/admin/reports")
+        const query = "status=" + reportStatus + "&page=" + reportPage + "&size=" + reportSize;
+        fetch("/api/admin/reports?" + query)
             .then((res) => res.json())
-            .then((list) => renderReports(list))
+            .then((data) => {
+                // 마지막 페이지의 항목을 다 처리해서 페이지가 비면 한 페이지 앞으로 이동
+                if (!data.items.length && reportPage > 0 && data.totalPages > 0) {
+                    reportPage = data.totalPages - 1;
+                    loadReports();
+                    return;
+                }
+                renderReports(data.items);
+                Object.keys(data.counts).forEach((key) => {
+                    const el = document.getElementById("report-count-" + key);
+                    if (el) el.textContent = data.counts[key].toLocaleString();
+                });
+                renderPagination(reportPagerEl, data.page, data.totalPages, function (p) {
+                    reportPage = p;
+                    loadReports();
+                });
+            })
             .catch(() => showReportMessage("제보 목록을 불러오지 못했습니다.", true));
     }
+
+    // 상태 필터 (전체/보류/승인/반려): 바꾸면 1페이지부터 다시 보여준다
+    document.querySelectorAll("#report-filter-tabs button").forEach((btn) => {
+        btn.addEventListener("click", function () {
+            reportStatus = this.dataset.status;
+            reportPage = 0;
+            document.querySelectorAll("#report-filter-tabs button").forEach((b) => b.classList.toggle("active", b === this));
+            loadReports();
+        });
+    });
+
+    // 표시 개수 (10/20/50)
+    document.getElementById("report-page-size").addEventListener("change", function () {
+        reportSize = parseInt(this.value, 10);
+        reportPage = 0;
+        loadReports();
+    });
 
     function renderReports(list) {
         reportTbody.innerHTML = "";
@@ -242,6 +282,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <button class="promote" data-action="approve" data-id="${r.reportId}" ${!isPending ? "disabled" : ""}>승인</button>
                         <button class="delete" data-action="reject" data-id="${r.reportId}" ${!isPending ? "disabled" : ""}>반려</button>
                         <button data-action="hold" data-id="${r.reportId}" ${isPending ? "disabled" : ""}>보류로</button>
+                        ${r.status === "REJECTED" ? `<button class="delete" data-action="delete" data-id="${r.reportId}">삭제</button>` : ""}
                     </div>
                 </td>
             `;
@@ -257,6 +298,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }).then(async (res) => {
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || "처리에 실패했습니다.");
+            return data;
+        });
+    }
+
+    function deleteReport(id) {
+        return fetch(`/api/admin/reports/${id}`, { method: "DELETE" }).then(async (res) => {
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "삭제에 실패했습니다.");
             return data;
         });
     }
@@ -287,6 +336,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (action === "hold") {
             updateReportStatus(id, "PENDING")
                 .then(() => { showReportMessage("보류 상태로 되돌렸습니다.", false); loadReports(); })
+                .catch((err) => showReportMessage(err.message, true));
+        }
+        if (action === "delete") {
+            if (!confirm("이 제보를 삭제할까요? 삭제하면 되돌릴 수 없습니다.")) return;
+            deleteReport(id)
+                .then(() => { showReportMessage("삭제되었습니다.", false); loadReports(); })
                 .catch((err) => showReportMessage(err.message, true));
         }
     });
@@ -332,10 +387,27 @@ document.addEventListener("DOMContentLoaded", function () {
         noticeMessageEl.className = "admin-message " + (isError ? "error" : "success");
     }
 
+    // 페이지 나눔 상태 (page는 0부터, 한 페이지 10개)
+    let noticePage = 0;
+    const NOTICE_PAGE_SIZE = 10;
+    const noticePagerEl = document.getElementById("notice-pagination");
+
     function loadNotices() {
-        fetch("/api/notices")
+        fetch("/api/notices?page=" + noticePage + "&size=" + NOTICE_PAGE_SIZE)
             .then((res) => res.json())
-            .then((list) => renderNotices(list))
+            .then((data) => {
+                // 마지막 페이지의 공지를 다 삭제해서 페이지가 비면 한 페이지 앞으로 이동
+                if (!data.items.length && noticePage > 0 && data.totalPages > 0) {
+                    noticePage = data.totalPages - 1;
+                    loadNotices();
+                    return;
+                }
+                renderNotices(data.items);
+                renderPagination(noticePagerEl, data.page, data.totalPages, function (p) {
+                    noticePage = p;
+                    loadNotices();
+                });
+            })
             .catch(() => showNoticeMessage("공지사항을 불러오지 못했습니다.", true));
     }
 
@@ -410,6 +482,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
                 showNoticeMessage(id ? "공지사항이 수정되었습니다." : "공지사항이 등록되었습니다.", false);
                 closeNoticeForm();
+                if (!id) noticePage = 0; // 새 공지는 최신순 맨 앞(1페이지)에 나타남
                 loadNotices();
             })
             .catch(() => {

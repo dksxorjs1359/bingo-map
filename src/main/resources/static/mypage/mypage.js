@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     loadMyReviews().then(renderRecentReviews);
 
-    // 1-3) 작성한 제보 (제보 탭 전용, 프로필 탭에는 별도 미리보기 없음)
+    // 1-3) 작성한 제보 (프로필 탭 '최근 제보 내역' + 제보 탭 전체 목록에서 공용으로 사용)
     let myReportsCache = null;
 
     const reportStatusLabel = { PENDING: "보류중", APPROVED: "승인됨", REJECTED: "반려됨" };
@@ -126,6 +126,15 @@ document.addEventListener("DOMContentLoaded", function () {
         );
     }
 
+    function renderRecentReports(reports) {
+        const el = document.getElementById("recent-reports-list");
+        if (!reports.length) {
+            el.innerHTML = '<p class="mypage-empty">아직 제보한 내역이 없습니다.<br><a href="/report">쓰레기통 위치 제보하러 가기</a></p>';
+            return;
+        }
+        el.innerHTML = reports.slice(0, 3).map(reportCardHtml).join("");
+    }
+
     function renderReports(reports) {
         const el = document.getElementById("reports-tab-panel");
         if (!reports.length) {
@@ -147,6 +156,8 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .catch(() => []);
     }
+
+    loadMyReports().then(renderRecentReports);
 
     // 2) 사이드바 메뉴 클릭 -> 페이지 이동 없이 해당 탭만 보여주기
     const navLinks = document.querySelectorAll(".mypage-nav a[data-tab]");

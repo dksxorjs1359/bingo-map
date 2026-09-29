@@ -134,7 +134,9 @@
                             <b>최근 제보 내역</b>
                             <a href="#" data-tab-link="reports">더보기</a>
                         </div>
-                        <p class="mypage-empty">아직 제보한 내역이 없습니다.<br>제보 기능은 곧 연동될 예정이에요.</p>
+                        <div id="recent-reports-list">
+                            <p class="mypage-empty">아직 제보한 내역이 없습니다.<br><a href="/report">쓰레기통 위치 제보하러 가기</a></p>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -147,7 +149,10 @@
             </section>
 
             <section id="tab-reports" class="mypage-tab-content" hidden>
-                <h2>작성한 제보</h2>
+                <div class="mypage-panel-head">
+                    <h2>작성한 제보</h2>
+                    <a class="mypage-edit-btn mypage-save-btn" href="/report" style="display:inline-block;text-decoration:none;">제보하기</a>
+                </div>
                 <div class="mypage-panel" id="reports-tab-panel">
                     <p class="mypage-empty">아직 제보한 내역이 없습니다.<br><a href="/report">쓰레기통 위치 제보하러 가기</a></p>
                 </div>

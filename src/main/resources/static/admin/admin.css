@@ -62,3 +62,13 @@
 .admin-actions button.reject{background:#fdecec;border-color:#f4c7c3;color:#c0392b;}
 
 @media(max-width:900px){.admin-layout{grid-template-columns:1fr;}.admin-sidebar{display:none;}.admin-stats{grid-template-columns:repeat(2,1fr);}}
+
+/* 제보 관리: 상태 필터 / 표시 개수 */
+.admin-filter-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+.admin-filter-tabs{display:flex;gap:6px;flex-wrap:wrap;}
+.admin-filter-tabs button{border:1px solid #ddd;background:#fff;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:#555;cursor:pointer;}
+.admin-filter-tabs button span{margin-left:2px;color:#999;font-weight:800;}
+.admin-filter-tabs button.active{background:#159b35;border-color:#159b35;color:#fff;}
+.admin-filter-tabs button.active span{color:#fff;}
+.admin-page-size{font-size:12px;color:#666;font-weight:700;}
+.admin-page-size select{margin-left:6px;border:1px solid #ddd;border-radius:8px;padding:5px 8px;font-size:12px;background:#fff;}

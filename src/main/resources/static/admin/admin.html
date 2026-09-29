@@ -104,6 +104,21 @@
             <section id="tab-reports" class="admin-tab-content" hidden>
                 <h2>쓰레기통 제보 관리</h2>
                 <div class="admin-panel">
+                    <div class="admin-filter-bar">
+                        <div class="admin-filter-tabs" id="report-filter-tabs">
+                            <button type="button" class="active" data-status="ALL">전체 <span id="report-count-ALL">0</span></button>
+                            <button type="button" data-status="PENDING">보류 <span id="report-count-PENDING">0</span></button>
+                            <button type="button" data-status="APPROVED">승인 <span id="report-count-APPROVED">0</span></button>
+                            <button type="button" data-status="REJECTED">반려 <span id="report-count-REJECTED">0</span></button>
+                        </div>
+                        <label class="admin-page-size">표시 개수
+                            <select id="report-page-size">
+                                <option value="10" selected>10개</option>
+                                <option value="20">20개</option>
+                                <option value="50">50개</option>
+                            </select>
+                        </label>
+                    </div>
                     <p class="admin-message" id="report-message"></p>
                     <table class="admin-table">
                         <thead>
@@ -121,6 +136,7 @@
                         <tbody id="report-table-body"></tbody>
                     </table>
                     <p class="admin-empty" id="report-empty" hidden>접수된 제보가 없습니다.</p>
+                    <div id="report-pagination" class="pagination"></div>
                     <div class="admin-actions">
                         <button type="button" class="approve" id="report-bulk-approve">선택 승인</button>
                         <button type="button" class="reject" id="report-bulk-reject">선택 반려</button>
@@ -171,6 +187,7 @@
                         <tbody id="notice-table-body"></tbody>
                     </table>
                     <p class="admin-empty" id="notice-empty" hidden>등록된 공지사항이 없습니다.</p>
+                    <div id="notice-pagination" class="pagination"></div>
                 </div>
 
                 <div id="notice-form-panel" class="admin-panel" hidden>
@@ -246,6 +263,7 @@
         <a class="top-btn" href="#">↑<small>TOP</small></a>
     </div>
 </footer>
+<script src="/js/pagination.js"></script>
 <script src="/admin/admin.js"></script>
 <script src="/js/header-auth.js"></script>
 </body>

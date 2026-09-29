@@ -57,3 +57,13 @@
 :root[data-theme="dark"] .mypage-email{color:#c3c7cd;}
 :root[data-theme="dark"] .settings-row-text span{color:#9aa0a8;}
 :root[data-theme="dark"] .settings-switch-track{background:#33383f;}
+
+/* 페이지 번호 (공지사항 / 관리자 목록 공용) */
+.pagination{display:flex;justify-content:center;align-items:center;gap:4px;margin:22px 0 4px;flex-wrap:wrap;}
+.pagination-btn{min-width:34px;height:34px;padding:0 10px;border:1px solid #e2e2e2;background:#fff;border-radius:8px;font-size:13px;font-weight:700;color:#555;cursor:pointer;}
+.pagination-btn:hover:not(:disabled){background:#f5f8f5;}
+.pagination-btn.active{background:#159b35;border-color:#159b35;color:#fff;}
+.pagination-btn:disabled{opacity:.4;cursor:default;}
+:root[data-theme="dark"] .pagination-btn{background:#22262d;border-color:#33383f;color:#e7e9ec;}
+:root[data-theme="dark"] .pagination-btn:hover:not(:disabled){background:#2a2e36;}
+:root[data-theme="dark"] .pagination-btn.active{background:#159b35;border-color:#159b35;color:#fff;}

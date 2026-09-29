@@ -3,7 +3,10 @@ package com.bingomap.bingo_map.notice;
 import com.bingomap.bingo_map.user.LoginController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import com.bingomap.bingo_map.common.PageResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -31,12 +34,23 @@ public class NoticeController
 
     // ===== 공개 API (로그인 여부 상관없이 누구나 조회 가능) =====
 
+    // page 파라미터가 있으면 페이지 나눔 응답(PageResponse), 없으면 예전처럼 전체 목록을 준다.
+    // 예) /api/notices?page=0&size=10  (page는 0부터, size는 1~50으로 제한)
     @GetMapping("/api/notices")
     @ResponseBody
-    public List<NoticeResponseDto> list() {
-        return noticeRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(this::toDto)
-                .toList();
+    public Object list(@RequestParam(required = false) Integer page,
+                       @RequestParam(defaultValue = "10") int size) {
+        if (page == null) {
+            return noticeRepository.findAllByOrderByCreatedAtDesc().stream()
+                    .map(this::toDto)
+                    .toList();
+        }
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), 50);
+        Page<Notice> result = noticeRepository
+                .findAllByOrderByCreatedAtDescNoticeIdDesc(PageRequest.of(safePage, safeSize));
+        List<NoticeResponseDto> items = result.getContent().stream().map(this::toDto).toList();
+        return PageResponse.of(result, items);
     }
 
     @GetMapping("/api/notices/{id}")
